@@ -1,0 +1,6 @@
+[
+  {"lead_id": "L1001", "rm_id": "RM001", "name": "Ramesh Patel", "employment": "salaried", "monthly_income": 65000, "existing_emi": 8000, "property_value": 2800000, "cibil": 772, "status": "docs_pending", "docs_required": ["PAN", "Aadhaar", "Last 3 salary slips", "6 months bank statement", "Property documents"], "docs_received": ["PAN", "Aadhaar", "Last 3 salary slips"]},
+  {"lead_id": "L1002", "rm_id": "RM001", "name": "Sunita Meena", "employment": "self_employed", "monthly_income": 90000, "existing_emi": 25000, "property_value": 4500000, "cibil": 718, "status": "new", "docs_required": ["PAN", "Aadhaar", "ITR with computation (3 yrs)", "12 months bank statement"], "docs_received": ["PAN"]},
+  {"lead_id": "L1003", "rm_id": "RM001", "name": "Vikram Rathore", "employment": "salaried", "monthly_income": 120000, "existing_emi": 0, "property_value": 8500000, "cibil": 801, "status": "ready_for_login", "docs_required": ["PAN", "Aadhaar", "Last 3 salary slips"], "docs_received": ["PAN", "Aadhaar", "Last 3 salary slips"]},
+  {"lead_id": "L1004", "rm_id": "RM002", "name": "Kavita Joshi", "employment": "salaried", "monthly_income": 45000, "existing_emi": 5000, "property_value": 1800000, "cibil": 745, "status": "new", "docs_required": ["PAN", "Aadhaar"], "docs_received": []}
+]
