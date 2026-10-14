@@ -43,3 +43,23 @@ def score_lead(lead_id):
         r.raise_for_status()
         return r.json()
     return _mock_score(lead)
+
+class TriageArgs(BaseModel):
+    rm_id: str = Field(description="RM employee id, e.g. RM001")
+    top_n: int = Field(default=3, ge=1, le=10)
+
+
+@tool("triage_leads", "Rank an RM's leads by priority. Use for 'which leads should I work on first'.", TriageArgs)
+def triage_leads(rm_id, top_n):
+    ranked = []
+    for l in _load():
+        if l["rm_id"] != rm_id:
+            continue
+        s = score_lead(l["lead_id"])
+        pending = [d for d in l["docs_required"] if d not in l["docs_received"]]
+        ranked.append({
+            "lead_id": l["lead_id"], "name": l["name"], "status": l["status"],
+            "conversion": s.get("conversion", 0), "risk": s.get("risk"), "pending_docs": pending,
+        })
+    ranked.sort(key=lambda x: x["conversion"], reverse=True)
+    return {"count": len(ranked), "top": ranked[:top_n]}

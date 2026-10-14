@@ -1,7 +1,7 @@
 from app.agent.prompts import ROUTER_PROMPT
 
 INTENTS = {
-    "triage": ["get_leads", "score_lead"],
+    "triage": ["triage_leads", "score_lead"],
     "eligibility": ["calc_eligibility"],
     "checklist": ["doc_checklist"],
     "followup": ["doc_checklist", "draft_followup"],
