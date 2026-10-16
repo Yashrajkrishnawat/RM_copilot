@@ -1,0 +1,12 @@
+{"message": "Which of my leads should I call first today?", "expected_intent": "triage", "expected_tools": ["triage_leads"]}
+{"message": "Aaj kis lead pe kaam karun?", "expected_intent": "triage", "expected_tools": ["triage_leads"]}
+{"message": "What is the score for lead L1002?", "expected_intent": "triage", "expected_tools": ["score_lead"]}
+{"message": "Customer earns 65000 a month, pays 8000 EMI, property worth 28 lakh. How much loan?", "expected_intent": "eligibility", "expected_tools": ["calc_eligibility"]}
+{"message": "Salary 1.2 lakh, no EMI, flat 85 lakh ka hai, kitna loan milega?", "expected_intent": "eligibility", "expected_tools": ["calc_eligibility"]}
+{"message": "EMI kitni banegi 40k income aur 20 lakh property pe 15 saal ke liye?", "expected_intent": "eligibility", "expected_tools": ["calc_eligibility"]}
+{"message": "Self employed customer, what documents do I need?", "expected_intent": "checklist", "expected_tools": ["doc_checklist"]}
+{"message": "Salaried customer has given PAN and Aadhaar, what is still pending?", "expected_intent": "checklist", "expected_tools": ["doc_checklist"]}
+{"message": "NRI case ke liye documents list do", "expected_intent": "checklist", "expected_tools": ["doc_checklist"]}
+{"message": "Send Ramesh a reminder for his bank statement and property papers", "expected_intent": "followup", "expected_tools": ["draft_followup"]}
+{"message": "Sunita ko Hindi mein message likho ki ITR jaldi bheje", "expected_intent": "followup", "expected_tools": ["draft_followup"]}
+{"message": "What is FOIR?", "expected_intent": "general", "expected_tools": []}

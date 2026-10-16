@@ -1,26 +1,46 @@
-import json
-from pathlib import Path
-
 import httpx
-from pydantic import  BaseModel, Field
+from pydantic import BaseModel, Field
 
+from app.clients.los import los
 from app.config import settings
 from app.tools.registry import tool
 
 
-DATA = Path(__file__).resolve().parents[2]/"data"/"leads.json"
+def _pending(lead):
+    return [d for d in lead["docs_required"] if d not in lead["docs_received"]]
 
-def _load():
-    return json.loads(DATA.read_text(encoding="utf-8"))
 
 class GetLeadsArgs(BaseModel):
     rm_id: str = Field(description="RM employee id, e.g. RM001")
     status: str | None = Field(default=None, description="Optional filter: new, docs_pending, ready_for_login")
 
+
 @tool("get_leads", "List leads assigned to an RM, optionally filtered by status.", GetLeadsArgs)
 def get_leads(rm_id, status):
-    leads = [l for l in _load() if l["rm_id"] == rm_id and (status is None or l["status"] == status)]
-    return {"count": len(leads), "leads": leads}
+    leads = los.list_leads(rm_id, status)
+    return {"count": len(leads), "leads": [{"lead_id": l["lead_id"], "name": l["name"], "status": l["status"]} for l in leads]}
+
+
+class FindCustomerArgs(BaseModel):
+    rm_id: str = Field(description="RM employee id, e.g. RM001")
+    query: str = Field(description="Customer name (or part of it) or lead id, e.g. 'Ramesh' or 'L1001'")
+
+
+@tool("find_customer", "Look up a customer's profile, income, EMIs, property value, status and pending documents by name or lead id.", FindCustomerArgs)
+def find_customer(rm_id, query):
+    matches = los.search(rm_id, query)
+    if not matches:
+        return {"error": f"no customer matching '{query}' for {rm_id}"}
+    if len(matches) > 1:
+        return {"multiple_matches": [{"lead_id": l["lead_id"], "name": l["name"]} for l in matches]}
+    l = matches[0]
+    return {
+        "lead_id": l["lead_id"], "name": l["name"], "employment": l["employment"], "city": l.get("city"),
+        "monthly_income": l["monthly_income"], "existing_emi": l["existing_emi"],
+        "property_value": l["property_value"], "loan_requested": l.get("loan_requested"),
+        "cibil": l["cibil"], "status": l["status"], "last_contacted": l.get("last_contacted"),
+        "pending_docs": _pending(l),
+    }
 
 
 class ScoreLeadArgs(BaseModel):
@@ -35,7 +55,7 @@ def _mock_score(lead):
 
 @tool("score_lead", "Get conversion and risk score for a lead.", ScoreLeadArgs)
 def score_lead(lead_id):
-    lead = next((l for l in _load() if l["lead_id"] == lead_id), None)
+    lead = los.get_lead(lead_id)
     if not lead:
         return {"error": f"lead {lead_id} not found"}
     if settings.ml_scoring_url:
@@ -43,6 +63,7 @@ def score_lead(lead_id):
         r.raise_for_status()
         return r.json()
     return _mock_score(lead)
+
 
 class TriageArgs(BaseModel):
     rm_id: str = Field(description="RM employee id, e.g. RM001")
@@ -52,14 +73,11 @@ class TriageArgs(BaseModel):
 @tool("triage_leads", "Rank an RM's leads by priority. Use for 'which leads should I work on first'.", TriageArgs)
 def triage_leads(rm_id, top_n):
     ranked = []
-    for l in _load():
-        if l["rm_id"] != rm_id:
-            continue
-        s = score_lead(l["lead_id"])
-        pending = [d for d in l["docs_required"] if d not in l["docs_received"]]
+    for l in los.list_leads(rm_id):
+        s = _mock_score(l) if not settings.ml_scoring_url else score_lead(l["lead_id"])
         ranked.append({
             "lead_id": l["lead_id"], "name": l["name"], "status": l["status"],
-            "conversion": s.get("conversion", 0), "risk": s.get("risk"), "pending_docs": pending,
+            "conversion": s.get("conversion", 0), "risk": s.get("risk"), "pending_docs": _pending(l),
         })
     ranked.sort(key=lambda x: x["conversion"], reverse=True)
     return {"count": len(ranked), "top": ranked[:top_n]}
