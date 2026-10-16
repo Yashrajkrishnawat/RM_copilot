@@ -25,7 +25,10 @@ class Tool:
             args = self.args_model(**raw_args)
         except ValidationError as e:
             return {"error": "invalid_arguments", "details": e.errors(include_url=False)}
-        return self.fn(**args.model_dump())
+        try:
+            return self.fn(**args.model_dump())
+        except Exception as e:
+            return {"error": "tool_failed", "details": str(e)}
 
 
 REGISTRY: dict[str, Tool] = {}

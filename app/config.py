@@ -13,6 +13,10 @@ class Settings(BaseSettings):
 
     agent_max_steps: int = 5
     ml_scoring_url: str = ""
+    leads_source: str = "json"
+    los_api_url: str = "http://localhost:8001"
+    los_api_key: str = ""
+    los_timeout: float = 10.0
 
     default_roi: float = 9.5
     foir_cap: float = 0.50
