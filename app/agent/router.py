@@ -9,7 +9,9 @@ INTENTS = {
     "general": [],
 }
 
-def route(user_msg, llm):
-    msg = llm.chat([{"role": "system", "content": ROUTER_PROMPT}, {"role": "user", "content": user_msg}])
-    text = (msg.content or "").lower()
-    return next((i for i in INTENTS if i in text), "genral")
+
+def route(user_msg, llm, focus=None):
+    text = f"[Discussing: {focus['name']} ({focus['lead_id']})] {user_msg}" if focus else user_msg
+    msg = llm.chat([{"role": "system", "content": ROUTER_PROMPT}, {"role": "user", "content": text}])
+    reply = (msg.content or "").lower()
+    return next((i for i in INTENTS if i in reply), "general")
